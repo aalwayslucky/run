@@ -18,13 +18,13 @@ jobs:
       - name: Find TODOs, BUGs, FIXes, NEWs
         run: |
           mkdir -p results
-          git grep -nE "(TODO|BUG|FIX|NEW):[1-5]:" -- '*.*' > results/issues.txt || true
+          git grep -nE "(TODO|BUG|FIX|NEW):[1-5]:\d*\.?\d+-\d*\.?\d+:" -- '*.*' > results/issues.txt || true
           cat results/issues.txt || echo "No issues found"
 
       - name: Upload to Supabase
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          TODO_URL: ${{ secrets.TODO_URL }}
+          TODO_KEY: ${{ secrets.TODO_KEY }}
           GITHUB_REPO: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
