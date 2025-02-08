@@ -48,29 +48,33 @@ else
     mkdir -p .github/scripts
     echo "Created necessary directories"
 
-    # Download and update workflow and script files
+    # Download and update workflow files
     echo "----------------------------------------"
     echo "Downloading latest workflow files..."
 
-    # Download workflow file
-    echo "Downloading todo_list.yaml..."
-    if ! curl -o ".github/workflows/todo_list.yaml" "https://raw.githubusercontent.com/aalwayslucky/run/main/.github/workflows/todo_list.yaml"; then
-        echo "Failed to download todo_list.yaml"
+    # Create a temporary directory
+    temp_dir=$(mktemp -d)
+    
+    # Clone the repository
+    echo "Cloning template repository..."
+    if ! git clone --depth 1 git@github.com:aalwayslucky/run.git "$temp_dir"; then
+        echo "Failed to clone template repository"
+        rm -rf "$temp_dir"
         exit 1
     fi
-    echo "✓ Successfully updated todo_list.yaml"
 
-    # Download script file
-    echo "Downloading upload_todos.py..."
-    if ! curl -o ".github/scripts/upload_todos.py" "https://raw.githubusercontent.com/aalwayslucky/run/main/.github/scripts/upload_todos.py"; then
-        echo "Failed to download upload_todos.py"
-        exit 1
-    fi
-    echo "✓ Successfully updated upload_todos.py"
+    # Copy the workflow files
+    echo "Copying workflow files..."
+    mkdir -p .github/workflows .github/scripts
+    cp "$temp_dir/.github/workflows/todo_list.yaml" .github/workflows/
+    cp "$temp_dir/.github/scripts/upload_todos.py" .github/scripts/
 
+    # Cleanup
+    rm -rf "$temp_dir"
+    
     # Make the Python script executable
     chmod +x .github/scripts/upload_todos.py
-    echo "✓ Made upload_todos.py executable"
+    echo "✓ Successfully updated workflow files"
 
     # Commit and push the changes
     if [ -n "$(git status --porcelain)" ]; then
