@@ -25,10 +25,6 @@ done
 # Ask for repository name
 read -p "Enter repository name: " repo_name
 
-# Create repository on GitHub
-echo "Creating repository..."
-gh repo create "$repo_name" --"$visibility" --source=. --remote=origin --push
-
 # Initialize git if not already initialized
 if [ ! -d .git ]; then
     git init
@@ -40,9 +36,15 @@ if [ ! -f README.md ]; then
     echo "Created README.md"
 fi
 
-# Add files, commit and push
+# Add files and create initial commit
 git add .
 git commit -m "Initial commit"
-git push -u origin main || git push -u origin master
+
+# Create repository on GitHub and push
+echo "Creating repository..."
+gh repo create "$repo_name" --"$visibility" --source=. --remote=origin --push || {
+    echo "Failed to create repository. Check if it already exists or if you have correct permissions."
+    exit 1
+}
 
 echo "Repository setup complete!"
