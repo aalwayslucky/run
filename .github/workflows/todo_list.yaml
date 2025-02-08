@@ -1,0 +1,37 @@
+name: Scan Issues in Commits
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  scan_todos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Find TODOs, BUGs, FIXes, NEWs
+        run: |
+          mkdir -p results
+          git grep -nE "(TODO|BUG|FIX|NEW):[1-5]:" -- '*.*' > results/issues.txt || true
+          cat results/issues.txt || echo "No issues found"
+
+      - name: Upload to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          python .github/scripts/upload_todos.py
+
+      - name: Archive Issue Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-results
+          path: results/issues.txt

@@ -36,6 +36,28 @@ if [ ! -f README.md ]; then
     echo "Created README.md"
 fi
 
+# Create GitHub Actions workflow directory
+mkdir -p .github/workflows
+mkdir -p .github/scripts
+
+# Download workflow and script files from public repository
+echo "Downloading workflow and script files..."
+if ! curl -o .github/workflows/todo_list.yaml https://raw.githubusercontent.com/aalwayslucky/run/main/.github/workflows/todo_list.yaml; then
+    echo "Failed to download workflow file"
+    exit 1
+fi
+
+if ! curl -o .github/scripts/upload_todos.py https://raw.githubusercontent.com/aalwayslucky/run/main/.github/scripts/upload_todos.py; then
+    echo "Failed to download script file"
+    exit 1
+fi
+
+# Make the Python script executable
+chmod +x .github/scripts/upload_todos.py
+
+# Add new files to git
+git add .github/workflows/todo_list.yaml .github/scripts/upload_todos.py
+
 # Add files and create initial commit
 git add .
 git commit -m "Initial commit"
